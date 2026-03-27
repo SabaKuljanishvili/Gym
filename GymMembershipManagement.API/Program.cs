@@ -1,0 +1,86 @@
+using GymMembershipManagement.API.Middleware;
+using GymMembershipManagement.DAL.Repositories;
+using GymMembershipManagement.DATA;
+using GymMembershipManagement.SERVICE;
+using GymMembershipManagement.SERVICE.Interfaces;
+using GymMembershipManagement.SERVICE.Mapping;
+using Microsoft.EntityFrameworkCore;
+
+namespace GymMembershipManagement.API
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+
+            // DB connection
+            builder.Services.AddDbContext<GymDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("GymDbConnection"));
+            });
+
+            builder.Services.AddScoped<DbContext, GymDbContext>();
+
+            // AutoMapper
+            builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>(), typeof(MappingProfile).Assembly);
+
+            // Controllers
+            builder.Services.AddControllers();
+
+            // Swagger
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+                {
+                    Title = "Gym Membership API",
+                    Version = "v1"
+                });
+            });
+
+            // Repositories
+            builder.Services.AddScoped<IGymClassRepository, GymClassRepository>();
+            builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
+            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IPersonRepository, PersonRepository>();
+            builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
+
+            // Services
+            builder.Services.AddScoped<IGymClassService, GymClassService>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IMembershipService, MembershipService>();
+            builder.Services.AddScoped<ITrainerService, TrainerService>();
+
+            var app = builder.Build();
+
+            // Global exception handling
+            app.UseMiddleware<ExceptionMiddleware>();
+
+            // Swagger — always visible
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gym API V1");
+                c.RoutePrefix = "swagger";
+            });
+
+            app.UseStaticFiles();
+            app.UseHttpsRedirection();
+            app.UseAuthorization();
+            app.MapControllers();
+
+            // Redirect root → Swagger
+            app.MapGet("/", context =>
+            {
+                context.Response.Redirect("/swagger/index.html");
+                return Task.CompletedTask;
+            });
+
+            app.Run();
+        }
+    }
+}
