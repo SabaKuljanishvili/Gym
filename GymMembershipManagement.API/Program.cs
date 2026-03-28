@@ -57,6 +57,22 @@ namespace GymMembershipManagement.API
 
             var app = builder.Build();
 
+            // --- ავტომატური მიგრაციის ბლოკი (დამატებულია ონლაინ ბაზისთვის) ---
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<GymDbContext>();
+                try
+                {
+                    // ეს ბრძანება ქმნის ცხრილებს ონლაინ ბაზაში, თუ ისინი არ არსებობს
+                    dbContext.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Migration error: {ex.Message}");
+                }
+            }
+            // -------------------------------------------------------------
+
             // Global exception handling
             app.UseMiddleware<ExceptionMiddleware>();
 
