@@ -14,6 +14,17 @@ namespace GymMembershipManagement.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // 1. CORS კონფიგურაცია
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()   // ნებას რთავს ნებისმიერ საიტს
+                          .AllowAnyMethod()   // ნებას რთავს POST, PUT, DELETE, GET
+                          .AllowAnyHeader();  // ნებას რთავს ნებისმიერ Header-ს (Content-Type და ა.შ.)
+                });
+            });
+
             // DB connection
             builder.Services.AddDbContext<GymDbContext>(options =>
             {
@@ -57,13 +68,15 @@ namespace GymMembershipManagement.API
 
             var app = builder.Build();
 
-            // --- ავტომატური მიგრაციის ბლოკი (დამატებულია ონლაინ ბაზისთვის) ---
+            // 2. CORS Middleware-ის გააქტიურება (მნიშვნელოვანია იყოს Routing-სა და Authorization-ს შორის)
+            app.UseCors("AllowAll");
+
+            // ავტომატური მიგრაციის ბლოკი
             using (var scope = app.Services.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<GymDbContext>();
                 try
                 {
-                    // ეს ბრძანება ქმნის ცხრილებს ონლაინ ბაზაში, თუ ისინი არ არსებობს
                     dbContext.Database.Migrate();
                 }
                 catch (Exception ex)
@@ -71,12 +84,10 @@ namespace GymMembershipManagement.API
                     Console.WriteLine($"Migration error: {ex.Message}");
                 }
             }
-            // -------------------------------------------------------------
 
             // Global exception handling
             app.UseMiddleware<ExceptionMiddleware>();
 
-            // Swagger — always visible
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -89,7 +100,6 @@ namespace GymMembershipManagement.API
             app.UseAuthorization();
             app.MapControllers();
 
-            // Redirect root → Swagger
             app.MapGet("/", context =>
             {
                 context.Response.Redirect("/swagger/index.html");
