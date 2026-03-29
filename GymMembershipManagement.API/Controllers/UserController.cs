@@ -41,6 +41,14 @@ namespace GymMembershipManagement.API.Controllers
             return Ok(user);
         }
 
+        // Admin only
+        [HttpGet("GetAllUsers")]
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers()
+        {
+            var users = await _userService.GetAllUsers();
+            return Ok(users);
+        }
+
         // Admin, Trainer, Member
         [HttpPut("UpdateProfile/{userId:int}")]
         public async Task<ActionResult<UserDTO>> UpdateProfile(int userId, [FromBody] UpdateUserModel model)

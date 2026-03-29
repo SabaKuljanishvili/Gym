@@ -9,6 +9,7 @@ namespace GymMembershipManagement.SERVICE.Interfaces
         Task<UserDTO> GetProfile(int userId);
         Task<UserDTO> UpdateProfile(int userId, UpdateUserModel model);
         Task DeleteProfile(int userId);
+        Task<IEnumerable<UserDTO>> GetAllUsers();
         void Logout();
     }
 }

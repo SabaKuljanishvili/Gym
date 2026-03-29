@@ -131,6 +131,12 @@ namespace GymMembershipManagement.SERVICE
             await _userRepository.DeleteAsync(userId);
         }
 
+        public async Task<IEnumerable<UserDTO>> GetAllUsers()
+        {
+            var users = await _userRepository.GetAllUsersWithRolesAsync();
+            return users.Select(MapToDTO).ToList();
+        }
+
         public void Logout()
         {
             // Client-side token invalidation (JWT stateless — token is removed on client)

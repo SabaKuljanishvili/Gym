@@ -12,6 +12,7 @@ namespace GymMembershipManagement.DAL.Repositories
         Task<User?> GetByIdWithPersonAsync(int id);
         Task<IEnumerable<User>> GetAllWithPersonAsync();
         Task<IEnumerable<User>> GetUsersByRoleAsync(string roleName);
+        Task<IEnumerable<User>> GetAllUsersWithRolesAsync();
     }
 
     public class UserRepository : BaseRepository<User>, IUserRepository
@@ -61,6 +62,14 @@ namespace GymMembershipManagement.DAL.Repositories
                 .Include(u => u.Person)
                 .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
                 .Where(u => u.UserRoles.Any(ur => ur.Role.RoleName == roleName))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<User>> GetAllUsersWithRolesAsync()
+        {
+            return await _context.Users
+                .Include(u => u.Person)
+                .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
                 .ToListAsync();
         }
     }
