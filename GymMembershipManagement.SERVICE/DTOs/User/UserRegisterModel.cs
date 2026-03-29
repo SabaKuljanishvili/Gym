@@ -17,18 +17,20 @@ namespace GymMembershipManagement.SERVICE.DTOs.User
         [MaxLength(100)]
         public string Email { get; set; } = null!;
 
-        [Required]
-        [MaxLength(20)]
-        public string FirstName { get; set; } = null!;
+        public CreatePersonDTO? Person {get; set; }
 
-        [Required]
-        [MaxLength(30)]
-        public string LastName { get; set; } = null!;
+        //[Required]
+        //[MaxLength(20)]
+        //public string FirstName { get; set; } = null!;
 
-        [MaxLength(20)]
-        public string Phone { get; set; } = null!;
+        //[Required]
+        //[MaxLength(30)]
+        //public string LastName { get; set; } = null!;
 
-        [MaxLength(50)]
-        public string Address { get; set; } = null!;
+        //[MaxLength(20)]
+        //public string Phone { get; set; } = null!;
+
+        //[MaxLength(50)]
+        //public string Address { get; set; } = null!;
     }
 }
